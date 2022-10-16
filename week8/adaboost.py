@@ -43,6 +43,19 @@ class AdaBoostClassifier():
         scores = []
         exp_losses = []
         ### YOUR CODE HERE 
+        for i in range(self.n_estimators):
+            tmp = self.weak_learner()
+            tmp.fit(X, y, w)
+            self.models.append(tmp)
+            y_pred = tmp.predict(X)
+            err = np.sum(w * (y_pred != y)) / np.sum(w)
+            alpha = 0.5 * np.log((1 - err) / err)
+            self.alphas.append(alpha)
+            w *= np.exp(-alpha * y * y_pred)
+            w /= np.sum(w)
+            scores.append(self.score(X, y))
+            exp_losses.append(self.exp_loss(X, y))
+        # Slide 13 1st F
         ### END CODE
 
         # remember to ensure that self.models and self.alphas are filled
@@ -64,6 +77,7 @@ class AdaBoostClassifier():
 
         loss = None
         ### YOUR CODE here 1-3 lines
+        loss = 1 / X.shape[0] * np.sum(np.exp(-y * self.ensemble_output(X)))   # Slide 9-10 2nd F
         ### END CODE
         return loss
         
@@ -81,6 +95,9 @@ class AdaBoostClassifier():
         if len(self.models) == 0:
             return np.zeros(X.shape[0])
         ### YOUR CODE HERE 3-8 lines
+        pred = np.zeros(X.shape[0])
+        for i in range(len(self.models)):
+            pred += self.alphas[i] * self.models[i].predict(X)  # sum of all t models. Multiply alpha with each hypothesis
         ### END CODE
         return pred
         
@@ -93,6 +110,7 @@ class AdaBoostClassifier():
         """
         pred = None
         ### YOUR CODE Here 1-3 lines
+        pred = np.sign(self.ensemble_output(X))  # Just sign whatever we get from ensemble_output
         ### END CODE 
         return pred
 
@@ -106,6 +124,7 @@ class AdaBoostClassifier():
         """
         score = 0
         ### YOUR CODE HERE 1-3 lines
+        score = np.sum(self.predict(X) == y) / X.shape[0] # Again accuracy. But with average of all predictions.
         ### END CODE
         return score
 
