@@ -59,7 +59,8 @@ class GradientBooster():
                 self.alphas.append(1)
             else:
                 tmp = self.weak_learner()
-                tmp.fit(X, y - self.predict(X))
+                yhat = -2 * (y - self.predict(X))
+                tmp.fit(X, yhat)
                 self.models.append(tmp)
                 self.alphas.append(lr)
             train_scores.append(self.score(X, y))

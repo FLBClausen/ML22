@@ -48,7 +48,7 @@ class AdaBoostClassifier():
             tmp.fit(X, y, w)
             self.models.append(tmp)
             y_pred = tmp.predict(X)
-            err = np.sum(w * (y_pred != y)) / np.sum(w)
+            err = np.sum(w * (y_pred != y))
             alpha = 0.5 * np.log((1 - err) / err)
             self.alphas.append(alpha)
             w *= np.exp(-alpha * y * y_pred)
