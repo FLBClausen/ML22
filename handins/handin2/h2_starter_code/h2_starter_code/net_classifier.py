@@ -1,3 +1,4 @@
+from cProfile import label
 import numpy as np
 
 def one_in_k_encoding(vec, k):
@@ -151,19 +152,32 @@ class NetClassifier():
         W2 = params['W2']
         b2 = params['b2']
         labels = one_in_k_encoding(y, W2.shape[1]) # shape n x k
-                        
+        cost = 0.0
+        for x in X:
         ### YOUR CODE HERE - FORWARD PASS - compute cost with weight decay and store relevant values for backprop
-        a = 
-        b = 
-        c = 
-        cost = np.mean(-np.log(softmax(e)[np.arange(X.shape[0]), y])) + c * (np.sum(W1**2) + np.sum(W2**2))
-        ### END CODE
-        
+            l1 = x.dot(W1)
+            l2 = l1 + b1
+            l3 = relu(l2)
+            l4 = l3.dot(W2)
+            l5 = l4 + b2
+            l6 = softmax(l5)
+            l7 = -label * np.log(l6)
+            cost += np.sum(l7) / X.shape[0] + c * (np.sum(W1 * W1) + np.sum(W2 * W2))
+         ### END CODE
         ### YOUR CODE HERE - BACKWARDS PASS - compute derivatives of all weights and bias, store them in d_w1, d_w2, d_b1, d_b2
+            d_l5 = l6 - label
+            d_l4 = d_l5.dot(W2.T)
+            d_l3 = d_l4 * (l3 > 0)
+            d_l2 = d_l3
+            d_l1 = d_l2
+            d_w1 = X.T.dot(d_l1) / X.shape[0] + 2 * c * W1
+            d_w2 = l3.T.dot(d_l5) / X.shape[0] + 2 * c * W2
+            d_b1 = np.sum(d_l2, axis=0) / X.shape[0]
+            d_b2 = np.sum(d_l5, axis=0) / X.shape[0]
+        # And plus the derivative of the weights
         
         
-
-
+        
         
         ### END CODE
         # the return signature
